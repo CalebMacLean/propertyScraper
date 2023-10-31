@@ -1,0 +1,34 @@
+Project 1: Landlord Property Site
+	Goal: The purpose of this site would be to gather data about property ownership in Reno and make it more easily accessible.
+	
+	Demographic: Generally I would imagine this site would be used by tenants, but really any user with intrest in who owns the most housing in Reno would benefit from this site.
+	
+	Data: I would need the data to include addresses of properties, name of owners, LLC names if applicable, and rental status.
+	
+	Outline:
+		Database Schema: The database itself doesn't need to be complex, having an Owner Table to better organize properties would be necessary, and for that to work we'll need a Property Table.
+			Owner Table: owner_id (integer, primary key)
+				     first_name (text, not nullable)
+				     last_name (text, not nullable)
+			Property Table: property_id (integer, primary key)
+					address (text, not nullable)
+					owner_id (integer, foreign key)
+					llc_id (integer, foreign key)
+			LLC Table: llc_id (integer, primary key)
+				   llc_name (text, not nullable)
+				   
+		Obstacles: 1. The site I intend to scrape doesn't include if a owner is renting the property, so for now the site will track all property owners
+			   2. The site's html doesn't have very detailed id usage for elements so will have to figure out how to bring the important elements to the scraper's attention.
+			   3. Will have to learn how to make a web-crawler/scraper to populate database with information.
+			   4. Should probably create an api that exist outside of the application.
+			   
+		Sensitive Information: I don't intend on having any users for this site, I don't see much point in it, the main goal of the site is to visualize data that is otherwise difficult to find.
+		
+		Functionality: 1. Searchability - The users should be able to look up properties, owners, and llcs to find relevant data.
+			       2. Updating Data Visualization - The site should present tables that have interesting data trends, like who ownes the most property.
+			       3. Developer Contact - I would want the user to be able to message me in some capacity to challenge data, inform of bugs, etc.
+		
+		Stretch Goals: 1. The Web-Crawler/Scraper
+			       2. Map Visualization Tool (this is a goal I may shoot for in the future)
+		
+				     
