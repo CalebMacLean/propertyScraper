@@ -8,8 +8,8 @@ Project 1: Landlord Property Site
 	Outline:
 		Database Schema: The database itself doesn't need to be complex, having an Owner Table to better organize properties would be necessary, and for that to work we'll need a Property Table.
 			Owner Table: owner_id (integer, primary key)
-				     first_name (text, not nullable)
-				     last_name (text, not nullable)
+				     full_name (text, not nullable)
+				     mail_address (integer, not nullable)
 			Property Table: property_id (integer, primary key)
 					address (text, not nullable)
 					owner_id (integer, foreign key)
