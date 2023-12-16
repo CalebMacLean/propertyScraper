@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Results{% endblock %}
+
+{% block content %}
+{% if properties %}
+    {% for property in properties %}
+    <div>
+        <p><a href="/owner/{{property.owner_id}}">{{ property.address }}</a></p>
+    </div>
+    {% endfor %}
+{% endif %}
+{% if owners %}
+    {% for owner in owners %}
+    <div>
+        <p><a href="/owner/{{owner.id}}">{{ owner.full_name }}</a></p>
+    </div>
+    {% endfor %}
+{% endif %}
+{% endblock %}

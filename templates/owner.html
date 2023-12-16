@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}{{ owner.full_name }}{% endblock %}
+
+{% block content %}
+<div>
+    <h1>{{ owner.full_name }}</h1>
+    <p>Mailing Address: {{ owner.address }}</p>
+    {% if company %}
+    <p>Company Name: {{ company.llc_name }}</p>
+    {% endif %}
+    <p>Property Count: {{ property_count }}</p>
+</div>
+
+<div>
+    <h4>Properties:</h4>
+    <ul>
+        {% for property in owner.properties %}
+        <li>{{ property.address }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

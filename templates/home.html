@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Home Page{% endblock %}
+
+{% block content %}
+<form action="/" method="post">
+    {{ form.hidden_tag() }}
+    
+    <div>{{ form.name.label }}: {{ form.name }}</div>
+    <div>{{ form.property.label }}: {{ form.property }}</div>
+    <button>Search!</button>
+</form>
+<div>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Amount of Properties</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for landlord in landlords %}
+            <tr>
+                <td><a href="/owner/{{landlord.id}}">{{ landlord.full_name }}</a></td>
+                <td>{{ landlord.property_count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

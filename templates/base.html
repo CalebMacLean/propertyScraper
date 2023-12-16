@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title%}{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <nav>
+            <span><h1><a href="/">Washoe Landlord Locator</a></h1></span>
+        </nav>
+    </header>
+    <main>
+        <!-- Flashed Messages Section -->
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul class="flashes">
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+        <!-- Template Section -->
+        {% block content %}
+        {% endblock %}
+    </main>
+    
+</body>
+</html>
