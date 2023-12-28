@@ -6,14 +6,14 @@
 {% if properties %}
     {% for property in properties %}
     <div>
-        <p><a href="/owner/{{property.owner_id}}">{{ property.address }}</a></p>
+        <p class="result" data-owner-id="{{property.owner_id}}">{{ property.address }}</p>
     </div>
     {% endfor %}
 {% endif %}
 {% if owners %}
     {% for owner in owners %}
     <div>
-        <p><a href="/owner/{{owner.id}}">{{ owner.full_name }}</a></p>
+        <p class="result" data-owner-id="{{owner.id}}">{{ owner.full_name }}</p>
     </div>
     {% endfor %}
 {% endif %}

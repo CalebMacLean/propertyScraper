@@ -1,0 +1,32 @@
+/* Common Styles */
+/* Colors 
+#002347 - Midnight Blue
+#003366 - Navy
+#003F7D - Dark Blue
+#FF8E00 - Orange
+#FD7702 - Dark Orange
+#FF5003 - Blood Orange
+*/
+body{
+    background-image: linear-gradient(20deg, #002347 30%, #FF5003);
+    background-repeat: no-repeat;
+    height: 100vh;
+    width: 100vw;
+}
+
+.container {
+    height: 100vh;
+    padding: 2rem;
+    background-color: aliceblue;
+}   
+#site-name, #site-name h1{
+width: fit-content;
+}
+
+.table {
+    background-color: rgba(255, 142, 0, 0.3);
+    border: 0.2rem solid #003F7D;
+}
+.table thead{
+    border-bottom: 0.4rem solid #003F7D;
+}
