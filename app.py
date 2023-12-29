@@ -49,7 +49,7 @@ def home():
                                 properties=properties)
     
     # Initial GET render
-    return render_template('home.html', 
+    return render_template('index.html', 
                            form=form, 
                            landlords=landlords)
 
@@ -83,7 +83,7 @@ def owner_info(owner_id):
 # RESTFUL JSON API
 # #########################################################
 
-@app.route('/search/properties')
+@app.route('/api/properties')
 def get_all_properties():
     """
     View function that retrieves all properties in the database and returns jsonified list.
@@ -93,27 +93,30 @@ def get_all_properties():
     return jsonify(properties=all_properties)
 
 
-@app.route('/search/companies')
+@app.route('/api/companies')
 def get_all_companies():
     """
     View function that retrieves all properties in the database and returns jsonified list.
     Returns: {"companies" : [{id, owner_id, owner_name, company_id, llc_name}, ...]} 
     """
     all_owner_company = [ownercompany.serialize() for ownercompany in OwnerCompany.query.all()]
-    return jsonify("companies", all_owner_company)
+    return jsonify(companies=all_owner_company)
 
 
-@app.route('/search/owners')
+@app.route('/api/owners')
 def get_all_owners():
     """
     View Function that retrieves all owners in the database and returns jsonified list.
     Returns: {"owners" : [{id, full_name, address}, ...]}
     """
     all_owners = [owner.serialize() for owner in Owner.query.all()]
-    return jsonify(owners=all_owners)
+    response = jsonify(owners=all_owners)
+    # Troubleshooting test validating that jsonify() worked:
+    # print(str(response.get_json()))
+    return response
 
 
-@app.route('/search/owners/<int:id>')
+@app.route('/api/owners/<int:id>')
 def get_owner(id):
     """
     View function that retieves an owner based on id from the database and returns jsonified data

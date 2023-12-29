@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title%}{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/style.css">
+    
+</head>
+<body>
+    <div class="container text-center">
+
+        <!-- Nav Bar -->
+        <div id="nav-container" class="row">
+            <header>
+                <nav>
+                    <!-- Logo -->
+                    <span id="site-name" class="col"><h1><a href="/">Lord Tracker</a></h1></span>
+                    <!-- List by Category Links -->
+                    <div id="owners" class="list-link"><p>Owners</p></div>
+                    <div id="properties" class="list-link"><p>Properties</p></div>
+                    <div id="companies" class="list-link"><p>Companies</p></div>
+                    <!-- Search Bar Form -->
+                    <form action="/" method="POST" class="col form-inline">
+                        <!-- form variable passed from root route -->
+                        {{ form.hidden_tag() }}
+                        <!-- Flask-WTF Form Fields -->
+                        <div class="form-group">{{ form.name.label }}: {{ form.name(class="form-control") }}</div>
+                        <div class="form-group">{{ form.property.label }}: {{ form.property(class="form-control") }}</div>
+                        <button class="btn btn-default">Search!</button>
+                    </form>
+                </nav>
+            </header>
+        </div>
+
+        <!-- Flashed Messages Section -->
+        <div id="flash-container" class="row">
+            <div class="col-12">
+                <!-- flashed message logic can be found in root route -->
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <ul class="alert">
+                    {% for message in messages %}
+                    <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+        
+        <!-- Table Section -->
+        <div id="table-container" class="row">
+            <table class="col-12 table table-hover table-striped">
+                <thead>
+                    <!-- Table Title -->
+                    <tr>
+                        <h4>Largest Property Owners</h4>
+                    </tr>
+                    <!-- Column Headers -->
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Amount of Properties</th>
+                    </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                    <!-- landlords variable passed from root route -->
+                    {% for landlord in landlords %}
+                    <tr>
+                        <td><a href="/owner/{{landlord.id}}">{{ landlord.full_name }}</a></td>
+                        <td>{{ landlord.property_count }}</td>
+                    </tr>
+                        {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginated List Section -->
+        <div id="list-container" class="row">
+            <ul
+            id="type-list"
+            class="col-12 list-group"></ul>
+
+        </div>
+
+        <!-- Search Results Section -->
+        <div id="results-container" class="row">
+
+        </div>
+
+        <!-- Owner Data Section -->
+        <div id="owner-container">
+
+        </div>
+
+    </div>
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.js"></script>
+    <script src="/static/script.js"></script>
+</body>
+</html>
