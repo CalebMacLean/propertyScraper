@@ -38,10 +38,10 @@ def home():
         owners = None
         # Conditional making sure one of the fields was filled out.
         if property_address:
-            properties = Property.query.filter(Property.address.contains(property_address)).all()
+            properties = Property.query.filter(Property.address.contains(property_address)).limit(10).all()
         
         if owner_name:
-            owners = Owner.query.filter(Owner.full_name.contains(owner_name)).all()
+            owners = Owner.query.filter(Owner.full_name.contains(owner_name)).limit(10).all()
         
         return render_template('search_results.html',
                                 form=form, 
@@ -49,7 +49,7 @@ def home():
                                 properties=properties)
     
     # Initial GET render
-    return render_template('index.html', 
+    return render_template('copy.html', 
                            form=form, 
                            landlords=landlords)
 
@@ -82,45 +82,95 @@ def owner_info(owner_id):
 # #########################################################
 # RESTFUL JSON API
 # #########################################################
+    
+# API HELPER FUCTIONS
+def paginate_by_page(model, page):
+    """
+    Creates a Flask-SQLAlchemy pagination obj based off of an existing Database Model and page.
+    Parameters:
+    model (Flask-SQLAlchemy Model Obj) : Must be a model used in the application's database.
+    page (int) : Must be a valid page number within the max range.
+    Returns:
+    Dictionary : {"items":[{dict}], "page_nav":{dict}}
+    Null : None
+    """
+    # Try to create pagination object based off the page_id given
+    try:
+        pag_obj = model.query.paginate(page=page, per_page=10)
+    # pag_obj will raise a 404 exception if page exceeds the max pages in the pagination object
+    except:
+        # Will set pag_obj to None for ease of conditional
+        pag_obj = None
+    # In cases where the pagination object didn't raise a 404, we will return the jsonified list of property dicts.
+    if not(pag_obj == None):
+        # Create dictionary that stores adjacent page_id values
+        page_nav = {"prev_page":None, "next_page":None}
+        # Calculate prev_page val if exsits
+        if(pag_obj.has_prev):
+            page_nav['prev_page'] = page - 1
+        # Calculate next_page val if exists
+        if(pag_obj.has_next):
+            page_nav['next_page'] = page + 1
+        # Create list of query items as dictionaries   
+        items_list = [item.serialize() for item in pag_obj.items]
+        # return dictionary of items_list and page_nav
+        return {"items":items_list, "page_nav":page_nav}
+    # Else return None
+    return None
 
-@app.route('/api/properties')
-def get_all_properties():
+
+@app.route('/api/properties/<int:page_id>')
+def get_all_properties(page_id):
     """
     View function that retrieves all properties in the database and returns jsonified list.
-    Returns: {"properties" : [{id, address, owner_id, company_id}, ...]}
+    Returns: 
+    hasResults (JSON) : "{"properties" : [{id, address, owner_id, company_id}, ...], "page_nav" : {prev_page, next_page}}"
+    noResults (Null) : None
     """
-    all_properties = [property.serialize() for property in Property.query.all()]
-    return jsonify(properties=all_properties)
+    paginated_dict = paginate_by_page(Property, page_id)
+    # Return JSON if pagination query was successful
+    if paginated_dict:
+        return jsonify(properties=paginated_dict["items"], 
+                       page_nav=paginated_dict["page_nav"])
+    # Else return None
+    return None
 
 
-@app.route('/api/companies')
-def get_all_companies():
+@app.route('/api/companies/<int:page_id>')
+def get_all_companies(page_id):
     """
     View function that retrieves all properties in the database and returns jsonified list.
-    Returns: {"companies" : [{id, owner_id, owner_name, company_id, llc_name}, ...]} 
+    Returns: {"companies" : [{id, owner_id, owner_name, company_id, llc_name}, ...], "page_nav" : {prev_page, next_page}} 
     """
-    all_owner_company = [ownercompany.serialize() for ownercompany in OwnerCompany.query.all()]
-    return jsonify(companies=all_owner_company)
+    paginated_dict = paginate_by_page(OwnerCompany, page_id)
+    # Return JSON if pagination query was successful
+    if paginated_dict:
+        return jsonify(companies=paginated_dict["items"], 
+                       page_nav=paginated_dict["page_nav"])
+    # Else return None
+    return None
 
 
-@app.route('/api/owners')
-def get_all_owners():
+@app.route('/api/owners/<int:page_id>')
+def get_all_owners(page_id):
     """
     View Function that retrieves all owners in the database and returns jsonified list.
-    Returns: {"owners" : [{id, full_name, address}, ...]}
+    Returns: {"owners" : [{id, full_name, address}, ...], "page_nav" : {prev_page, next_page}}
     """
-    all_owners = [owner.serialize() for owner in Owner.query.all()]
-    response = jsonify(owners=all_owners)
-    # Troubleshooting test validating that jsonify() worked:
-    # print(str(response.get_json()))
-    return response
+    paginated_dict = paginate_by_page(Owner, page_id)
+    # Return JSON if pagination query was successful
+    if paginated_dict:
+        return jsonify(owners=paginated_dict["items"], 
+                       page_nav=paginated_dict["page_nav"])
+    # Else return None
+    return None
 
 
 @app.route('/api/owners/<int:id>')
 def get_owner(id):
     """
     View function that retieves an owner based on id from the database and returns jsonified data
-    Returns: {"owner" : {id, full_name, address, *llc_name, *property_count, *properties}}
+    Returns: {"owner" : {id, full_name, address, *llc_name, *property_count, *[properties]}}
     """
     def has_company(owner_id):
         """Helper Function, checks to see if the owner has an associated llc"""
@@ -142,15 +192,17 @@ def get_owner(id):
     if has_company(id):
         company_dict = OwnerCompany.query.get(id).serialize()
         owner_dict['llc_name'] = company_dict.llc_name
+    else:
+        owner_dict['llc_name'] = None
     # Using sqlalchemy's func object we can count the number of unique properties that share an owner id.
     property_count = db.session.query(func.count(Property.id)).filter(Property.owner_id == id).scalar()
     # CASE: the owner should always have one piece of property associated, 
     # Otherwise there was a scrapper error and the database's integrity is in question.
-    if property_count > 0:
-        owner_dict['property_count'] = property_count
-        # Adds list of property addresses owned by owner to the dict
-        properties = [property.address for property in Owner.query.get(id).properties]
-        owner_dict['properties'] = properties
+    
+    owner_dict['property_count'] = property_count
+    # Adds list of property addresses owned by owner to the dict
+    properties = [property.address for property in Owner.query.get(id).properties]
+    owner_dict['properties'] = properties
     
     return jsonify(owner=owner_dict)
 

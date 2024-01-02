@@ -1,20 +1,47 @@
-{% extends "base.html" %}
-
-{% block title %}Results{% endblock %}
+{% extends "index.html" %}
 
 {% block content %}
-{% if properties %}
-    {% for property in properties %}
-    <div>
-        <p class="result" data-owner-id="{{property.owner_id}}">{{ property.address }}</p>
+{% if properties and owners %}
+    <div class="col-12 container">
+        <h4>Properties:</h4>
+        <ul class="row">
+            {% for property in properties %}
+            <li 
+            class="col-6 owner-link list-group-item" 
+            data-owner-id="{{property.owner_id}}">
+            {{ property.address }}</li>
+            {% endfor %}
+        </ul>
+        <h4>Owners: </h4>
+        <ul class="row">
+            {% for owner in owners %}
+                <li 
+                class="col-6 owner-link list-group-item" 
+                data-owner-id="{{owner.id}}">
+                {{ owner.full_name }}</p>
+            {% endfor %}
+        </ul>
     </div>
-    {% endfor %}
-{% endif %}
-{% if owners %}
-    {% for owner in owners %}
-    <div>
-        <p class="result" data-owner-id="{{owner.id}}">{{ owner.full_name }}</p>
-    </div>
-    {% endfor %}
+
+{% else %}
+<h4>Top Results: </h4>
+<ul id="result-list" class="col-12 list-group-flush">
+    {% if properties %}
+        {% for property in properties %}
+        <li 
+        class="owner-link list-group-item" 
+        data-owner-id="{{property.owner_id}}">
+        {{ property.address }}</li>
+        {% endfor %}
+    {% endif %}
+    {% if owners %}
+        {% for owner in owners %}
+            <li 
+            class="owner-link list-group-item" 
+            data-owner-id="{{owner.id}}">
+            {{ owner.full_name }}</p>
+        {% endfor %}
+    {% endif %}
+</ul>
 {% endif %}
 {% endblock %}
