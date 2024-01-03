@@ -1,6 +1,5 @@
 from flask import Flask, render_template, flash, redirect, request, jsonify
 from modules import Property, Owner, Company, OwnerCompany, connect_db, db
-from forms import SearchForm
 from admin import SECRET_KEY, DATABASE_URI
 from sqlalchemy import func
 import os
@@ -43,7 +42,7 @@ def home():
                                 # companies=companies)
     
     # Initial GET render
-    return render_template('idx.html')
+    return render_template('index.html')
     
 # #########################################################
 # RESTFUL JSON API
@@ -131,7 +130,7 @@ def get_all_owners(page_id):
     return None
 
 
-@app.route('/api/owners/<int:id>')
+@app.route('/api/owner/<int:id>')
 def get_owner(id):
     """
     View function that retieves an owner based on id from the database and returns jsonified data
@@ -186,8 +185,8 @@ def get_top_owners():
     owners = [{"id": o.id, "full_name": o.full_name, "property_count": o.property_count} for o in q]
     return jsonify(owners=owners)
 
-@app.route('/api/?<q>')
-def search_all_tables(q):
+@app.route('/api/search')
+def search_all_tables():
     """
     Retrieves likely results from all database tables based on query val and returns JSON
     Parameters:
@@ -195,6 +194,8 @@ def search_all_tables(q):
     Returns:
     - JSON : {"owners": [{id, full_name, address},..], "properties": [{id, address, owner_id, company_id},...],, "companies": [{id, llc_name, owner_id}]}
     """
+    # get query val
+    q = request.args.get('query', '')
     # query result variables
     q_owner = Owner.query.filter(Owner.full_name.contains(q)).limit(10).all()
     q_property = Property.query.filter(Property.address.contains(q)).limit(10).all()

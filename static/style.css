@@ -1,116 +1,30 @@
-/* Common Styles */
-/* Colors 
-#002347 - Midnight Blue
-#003366 - Navy
-#003F7D - Dark Blue
-#FF8E00 - Orange
-#FD7702 - Dark Orange
-#FF5003 - Blood Orange
-*/
-/* Fonts
-Notable
-Lato [thin 100, light 300, regular 400, bold 700, black 900 italic]
-*/
-/* Common Styles */
 *{
     margin: 0;
     padding: 0;
-    font-family: 'Lato';
     color: black;
-    text-decoration: none;
+    font-size: 1.1rem;
+    font-family: "Lato";
+    font-weight: 400;
 }
-
-body{
-    background-image: linear-gradient(20deg, #000000 30%, #880000);
-    background-repeat: repeat-x;
-    max-height: 100vh;
-    min-height: 100vh;
-    width: 100vw;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-a:hover {
-    text-decoration: none;
-}
-
-label{
-    color:lightblue;
-    align-self: flex-start;
-    justify-self: flex-end;
-}
-
-.center {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.container {
-    padding: 2rem;
-}
-
-.owner-link{
+.owner-link {
     cursor: pointer;
-}
-/* Common Styles End */
-/* Styles for Header Elements */
-#top {
-    position: fixed;
-    top: 0;
-    left: 0;
-    padding-left: 0.4rem;
-    padding-right: 0.4rem;
-}
-header{
-    width: 100vw;
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-
-#nav-head{
-    background-color: #FF5003;
-    width: 100%;
-}
-
-#search-form{
-    background-color: #003366;
-}  
-
-#site-name, #site-name h1{
-width: fit-content;
-font-family: 'Notable', Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-font-size: 2.8rem;
-}
-
-.list-link{
-    font-weight: 700;
-    font-size: 1.2rem;
-    color: #000000;
     transition: all 1s;
-    cursor: pointer;
-}
-.list-link:hover{
-    color:white;
-    font-size: 1.4rem;
-}
-/* End of Styles for Header Elements */
-/* Styles for Content Sections */
-#content{
-    position: relative;
-}
-/* End of Styles for Content Sections */
-/* Styles for Table Section */
-.table {
-    background-color: rgba(255, 142, 0, 0.3);
-    border: 0.2rem solid #003F7D;
 }
 
-.table thead{
-    border-bottom: 0.4rem solid #003F7D;
+.owner-link:hover {
+    font-size: 1.3rem;
 }
-/* End of Styles for Table Section */
+/* Nav Items */
+.navbar-brand {
+    cursor: pointer;
+    font-family: Notable;
+    font-size: 1.5rem;
+}
+/* List Container Section Styles */
+.page-btn {
+    font-size: 1rem;
+}
+
+#next-btn {
+    margin-left: auto;
+}
