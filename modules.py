@@ -41,6 +41,13 @@ class Company(db.Model):
                                 autoincrement=True)
     llc_name = db.Column(db.String(50), nullable=False,
                                         unique=True)
+    
+    def serialize(self) :
+        return {
+            "id" : self.id,
+            "llc_name" : self.llc_name,
+            "owner_id" : self.owner_company.owner_id
+        }
 
 
 class OwnerCompany(db.Model):
@@ -56,8 +63,8 @@ class OwnerCompany(db.Model):
                                        nullable=False)
     
     # Relationships
-    owner = db.relationship('Owner', backref='owner_companies', foreign_keys=[owner_id])
-    company = db.relationship('Company', backref='owner_companies', foreign_keys=[company_id])
+    owner = db.relationship('Owner', backref='owner_company', foreign_keys=[owner_id])
+    company = db.relationship('Company', backref='owner_company', foreign_keys=[company_id])
 
     # Unique Constraints
     __table_args__ = (db.UniqueConstraint('owner_id', 'company_id', name='uix_owner_company'),)

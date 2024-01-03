@@ -13,7 +13,7 @@
 <body>
 
     <!-- Nav Bar -->
-    <header id="top">
+    <header >
         <nav class="d-flex flex-column">
             <div id="nav-head" class="d-flex flex-row">
                 <div id="logo-container" class="d-flex align-items-end justify-content-between">
@@ -88,9 +88,9 @@
                             <th scope="col">Amount of Properties</th>
                         </tr>
                     </thead>
-                    <tbody class="table-group-divider">
+                    <tbody id="owner-tbody" class="table-group-divider">
                         <!-- landlords variable passed from root route -->
-                        {% for landlord in landlords %}
+                        <!-- {% for landlord in landlords %}
                         <tr>
                             <td><p 
                                 class="owner-link" 
@@ -99,7 +99,7 @@
                             </td>
                             <td>{{ landlord.property_count }}</td>
                         </tr>
-                            {% endfor %}
+                        {% endfor %} -->
                     </tbody>
                 </table>
             </div>

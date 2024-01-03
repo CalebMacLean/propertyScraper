@@ -16,75 +16,41 @@ app.app_context().push()
 connect_db(app)
 db.create_all()
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def home():
     # GET Behaviors
     # Form Search Form created in forms.py
-    form = SearchForm()
     # Query to database that finds the top 10 owners with the most property.
-    landlords = (db.session.query(Owner.id, Owner.full_name, func.count(Property.id).label('property_count'))
-                .join(Property)
-                .group_by(Owner.id)
-                .order_by(func.count(Property.id).desc())
-                .limit(10))
+    # landlords = (db.session.query(Owner.id, Owner.full_name, func.count(Property.id).label('property_count'))
+    #             .join(Property)
+    #             .group_by(Owner.id)
+    #             .order_by(func.count(Property.id).desc())
+    #             .limit(10))
     
     # POST Behaviors
-    if form.validate_on_submit():
+    # if form.validate_on_submit():
         # Variables containing form values
-        owner_name = form.name.data.upper()
-        property_address = form.property.data.upper()
-
-        properties = None
-        owners = None
-        # Conditional making sure one of the fields was filled out.
-        if property_address:
-            properties = Property.query.filter(Property.address.contains(property_address)).limit(10).all()
-        
-        if owner_name:
-            owners = Owner.query.filter(Owner.full_name.contains(owner_name)).limit(10).all()
-        
-        return render_template('search_results.html',
-                                form=form, 
-                                owners=owners, 
-                                properties=properties)
+        # search_val = form.search.data.upper()
+        # Render Variables 
+        # properties = Property.query.filter(Property.address.contains(search_val)).limit(10).all()
+        # owners = Owner.query.filter(Owner.full_name.contains(search_val)).limit(10).all()
+        # companies = Company.query.filter(Company.llc_name.contains(search_val)).limit(10).all()
+        # Render page
+        # return render_template('search_results.html',
+                                # form=form, 
+                                # owners=owners, 
+                                # properties=properties,
+                                # companies=companies)
     
     # Initial GET render
-    return render_template('copy.html', 
-                           form=form, 
-                           landlords=landlords)
-
-@app.route('/owner/<int:owner_id>')
-def owner_info(owner_id):
-    try:
-        # Query the database for the owner with the given id
-        owner = Owner.query.get_or_404(owner_id)
-        # Query the database to find the amount of properties an owner owns
-        property_count = db.session.query(func.count(Property.id)).filter(Property.owner_id == owner_id).scalar()
-        # Query the database to find if there is a company associated with this owner
-        company_id = db.session.query(OwnerCompany.company_id).filter(OwnerCompany.owner_id == owner_id).scalar()
-        # Not all owners have companies, but if they do render html with company variable.
-        if company_id:
-            # Gets Company from database if their is a company id
-            company = Company.query.get_or_404(company_id)
-        else:
-            # Sets company to none if no company
-            company = None
-        # Render the owner.html template with the owner
-        return render_template('owner.html', 
-                               owner=owner,
-                               property_count=property_count, 
-                               company=company)
-    
-    except Exception as e:
-        error = e
-        return render_template('error.html', error=error)
+    return render_template('idx.html')
     
 # #########################################################
 # RESTFUL JSON API
 # #########################################################
     
 # API HELPER FUCTIONS
-def paginate_by_page(model, page):
+def paginate_table_by_page(model, page):
     """
     Creates a Flask-SQLAlchemy pagination obj based off of an existing Database Model and page.
     Parameters:
@@ -118,7 +84,6 @@ def paginate_by_page(model, page):
     # Else return None
     return None
 
-
 @app.route('/api/properties/<int:page_id>')
 def get_all_properties(page_id):
     """
@@ -127,7 +92,7 @@ def get_all_properties(page_id):
     hasResults (JSON) : "{"properties" : [{id, address, owner_id, company_id}, ...], "page_nav" : {prev_page, next_page}}"
     noResults (Null) : None
     """
-    paginated_dict = paginate_by_page(Property, page_id)
+    paginated_dict = paginate_table_by_page(Property, page_id)
     # Return JSON if pagination query was successful
     if paginated_dict:
         return jsonify(properties=paginated_dict["items"], 
@@ -142,7 +107,7 @@ def get_all_companies(page_id):
     View function that retrieves all properties in the database and returns jsonified list.
     Returns: {"companies" : [{id, owner_id, owner_name, company_id, llc_name}, ...], "page_nav" : {prev_page, next_page}} 
     """
-    paginated_dict = paginate_by_page(OwnerCompany, page_id)
+    paginated_dict = paginate_table_by_page(OwnerCompany, page_id)
     # Return JSON if pagination query was successful
     if paginated_dict:
         return jsonify(companies=paginated_dict["items"], 
@@ -157,7 +122,7 @@ def get_all_owners(page_id):
     View Function that retrieves all owners in the database and returns jsonified list.
     Returns: {"owners" : [{id, full_name, address}, ...], "page_nav" : {prev_page, next_page}}
     """
-    paginated_dict = paginate_by_page(Owner, page_id)
+    paginated_dict = paginate_table_by_page(Owner, page_id)
     # Return JSON if pagination query was successful
     if paginated_dict:
         return jsonify(owners=paginated_dict["items"], 
@@ -205,6 +170,55 @@ def get_owner(id):
     owner_dict['properties'] = properties
     
     return jsonify(owner=owner_dict)
+
+@app.route('/api/owners/most')
+def get_top_owners():
+    """
+    Retrieves owners with the most properties from the data base and returns them in JSON.
+    Return:
+    JSON : {"owners" : [{id, full_name, property_count}, ...]}
+    """
+    q = (db.session.query(Owner.id, Owner.full_name, func.count(Property.id).label('property_count'))
+                .join(Property)
+                .group_by(Owner.id)
+                .order_by(func.count(Property.id).desc())
+                .limit(10))
+    owners = [{"id": o.id, "full_name": o.full_name, "property_count": o.property_count} for o in q]
+    return jsonify(owners=owners)
+
+@app.route('/api/?<q>')
+def search_all_tables(q):
+    """
+    Retrieves likely results from all database tables based on query val and returns JSON
+    Parameters:
+    - q (str) : search val
+    Returns:
+    - JSON : {"owners": [{id, full_name, address},..], "properties": [{id, address, owner_id, company_id},...],, "companies": [{id, llc_name, owner_id}]}
+    """
+    # query result variables
+    q_owner = Owner.query.filter(Owner.full_name.contains(q)).limit(10).all()
+    q_property = Property.query.filter(Property.address.contains(q)).limit(10).all()
+    # Output of this query is [(<Company>, <OwnerCompany>),...]
+    # Flaw of Database Schema is Company should rework that to be streamlined for queries
+    q_company = db.session.query(Company, OwnerCompany).join(OwnerCompany, OwnerCompany.company_id == Company.id).filter(Company.llc_name.contains(q)).all()
+
+    # serialized element lists determined by query variables finding results
+    if q_owner:
+        owners = [o.serialize() for o in q_owner]
+    else:
+        owners = None
+    if q_property:
+        properties = [p.serialize() for p in q_property]
+    else:
+        properties = None
+    if q_company:
+        # Using last query we can create a list of OwnerCompany instances which is more useful than a Company instance
+        q_owner_company = [tuple[1] for tuple in q_company]
+        companies = [c.serialize() for c in q_owner_company]
+    else:
+        companies = None
+    # return the jsonified list in their respective sections
+    return jsonify(owners=owners, properties=properties, companies=companies)
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,164 +1,215 @@
 // Site Set Up
-// Global Value determines if user has used the search form since last page refresh.
-const hasSearched = localStorage.getItem("searched");
-
-if (hasSearched) {
-    // unused containers
-    const containerArr = ['list-container', 'table-container', 'owner-container'];
-    // loop hiding containers
-    for(let container of containerArr) {
-        $(`#${container}`).hide();
-    }
-    // remove searched from localstorage
-    localStorage.clear() 
-} else {
-    const containerArr = ['list-container', 'owner-container', 'results-container'];
-    // loop hiding containers
-    for(let container of containerArr) {
-        $(`#${container}`).hide();
-    }
-}
-
-
+$(document).ready(function(){
+    hideSections(["table-container", "list-container", "results-container", "owner-container"]);
+    generateTable();
+});
 // Click Events for Static Elements
-$("#search-btn").click(setSearched);
-$('.list-link').click(listByCategory);
+$("#search-btn").click(search);
+$('.nav-link').click(listByCategory);
 
 // Click Events for Dynamic Elements
-$(document).on('click', '.page-nav-btn', navTypePage);
+$(document).on('click', '.page-btn', traversePages);
 $(document).on('click', '.owner-link', showOwnerData);
 
 
 // Helper Functions
-// Render Nav Buttons for Paginated Results
+// Hide Sections
+function hideSections(arr) {
+    for(let container of arr) {
+        $(`#${container}`).hide();
+    }
+}
+
+// render nav buttons for paginated results
 function renderNavButtons(category, navObj) {
-    // Extract prev & next vals
+
+    // extract prev & next vals
     const prev = navObj["prev_page"];
     const next = navObj["next_page"];
-    // Create Button Helper Function
+
+    // Helper Function
     function createBtn(page_id, text) {
-        // Create Dynamic page var
+        // create dynamic page var
         const page = `${page_id}`;
-        // Construct Button with url saved as data attribute
-        // Use text parameter to give btn text
-        const btn = 
-        `<span 
-        class="page-nav-btn ${category}-list"
-        data-page-id="${page}">
-        ${text}</span>`;
-        // Add btn to container
-        $("#nav-btn-container").append(btn);
+        // create btn 
+        const btn =
+        $("<btn></btn>")
+        // classes for traversePages
+        .addClass(`page-btn ${category}-list`)
+        .data("page-id", page)
+        .text(text);
+        // push btn to markup
+        $("#page-btn-container").append(btn);
 
     };
+
     // Case: prev is truthy
     if (prev) {createBtn(prev, 'prev')};
     // Case: next is truthy
     if(next) {createBtn(next, 'next')};
 }
 
-// Render Owner lis with links to owners and links to adjacent pages
+
+// render owner lis with links to owners and links to adjacent pages
 async function renderAllOwnersByPage(page) {
-    // Construct Dynmic URL path based on page parameter.
+    // construct dynmic URL path based on page parameter.
     const urlPath = `api/owners/${page}`;
-    // Make GET request to urlPath
+    // make GET request to urlPath
     const response = await axios.get(urlPath);
-    // owners variable should be an array populated with objects
+    // owners var should be an array populated with obj
     const owners = response.data.owners;
     const pageNav = response.data.page_nav;
     // loop that appends modified li to the #type-list ul
     for (let owner of owners) {
-        const li = 
-        `<li
-        class="list-group-item owner-link"
-        data-owner-id=${owner['id']}>
-        ${owner['full_name']}</li>`;
+        // create dynamic li
+        const li =
+        $("<li></li>")
+        // bootstrap class and showOwnerInfo class
+        .addClass("list-group-item owner-link")
+        // data-owner-id needed for showOwnerInfo
+        .data("owner-id", owner["id"])
+        .text(owner["full_name"]);
 
         $("#type-list").append(li);
     }
-    // Function can be found under Helper Functions
+    // function can be found under Helper Functions
     renderNavButtons('owners', pageNav);
 }
 
-// Render Property lis with links to owners and links to adjacent pages
+
+// render property lis with links to owners and links to adjacent pages
 async function renderAllPropertiesByPage(page) {
-    // Construct Dynmic URL path based on page parameter.
+    // construct dynmic URL path based on page parameter.
     const urlPath = `api/properties/${page}`;
-    // Make GET request to urlPath
+    // make GET request to urlPath
     const response = await axios.get(urlPath);
-    // owners variable should be an array populated with objects
+    // owners var should be an array populated with obj
     const properties = response.data.properties;
     const pageNav = response.data.page_nav;
     // loop that appends modified li to the #type-list ul
     for (let property of properties) {
+        // create dynamic li
         const li = 
-            `<li
-            class="list-group-item owner-link"
-            data-owner-id=${property['owner_id']}>
-            ${property['address']}</li>`;
-
+        $("<li></li>")
+        // bootstrap class and showOwnerInfo class
+        .addClass("list-group-item owner-link")
+        // data-owner-id needed for showOwnerInfo
+        .data("owner-id", property['owner_id'])
+        .text(property["address"]);
+        // push li to markup
         $("#type-list").append(li);
     }
-    // Function can be found under Helper Functions
+    // function can be found under Helper Functions
     renderNavButtons('properties', pageNav);
 }
 
-// Render Company lis with links to owners and links to adjacent pages
+
+// render company lis with links to owners and links to adjacent pages
 async function renderAllCompaniesByPage(page) {
-    // Construct Dynmic URL path based on page parameter.
+    // construct dynmic URL path based on page parameter.
     const urlPath = `api/companies/${page}`;
-    // Make GET request to urlPath
+    // make GET request to urlPath
     const response = await axios.get(urlPath);
-    // owners variable should be an array populated with objects
+    // owners var should be an array populated with obj
     const companies = response.data.companies;
     const pageNav = response.data.page_nav;
     // loop that appends modified li to the #type-list ul
     for (let company of companies) {
+        // create dynamic li
         const li = 
-        `<li
-        class="list-group-item owner-link"
-        data-owner-id=${company['owner_id']}>
-        ${company['llc_name']}</li>`;
-
+        $("<li></li>")
+        // bootstrap class and showOwnerInfo class
+        .addClass("list-group-item owner-link")
+        // data-owner-id needed for showOwnerInfo
+        .data("owner-id", company["owner_id"])
+        .text(company["llc_name"]);
+        // push li to markup
         $("#type-list").append(li);
     }
 
     renderNavButtons("companies", pageNav);
 }
 
-// Handler Functions
-// #search-btn Handler Function
-function setSearched() {
-    // searching with the form will add a truthy searched key to local storage.
-    // the searched key will be cleared if the page ever loads with searched in localstorage.
-    localStorage.setItem("searched", true);
+// Renders Search result sections by categories includes title as h4, 
+function renderSearchResults(map, objArr) {
+    // Owners : {"ownerId": }
 }
 
+// Handler Functions
+// #search-btn Handler Function
+async function search(evt) {
+    // Prevent default button behavior
+    evt.preventDefault();
+    // Hide Sections
+    hideSections(['list-container', 'table-container', 'owner-container']);
+    // Store search val
+    const searchVal = $("#search-input").val();
+    // Try/Catch API interaction
+    try {
+        // Make GET request to API
+        const response = await axios.get(`/api/?${searchVal}`);
+        // Store Results in respective categories
+        const owners = response.data.owners;
+        const properties = response.data.properties;
+        const companies = response.data.companies;
+        // Conditional checking in there were any results found
+        if (owners || properties || companies) {
+            if (properties) {renderSearchResults('')}
+        }
+        else {
+
+        }
+    }
+    catch(err) {
+        console.log(err);
+    }
+}
+
+// document.ready Handler Function
+async function generateTable() {
+    try{
+        // request top 10 property owners from database
+        const response = await axios.get('api/owners/most');
+        const owners = response.data.owners;
+        // loop through each owner from response and create tr with dynamic data
+        for (let owner of owners) {
+            // data-owner-id and .ownerlink are needed to make tr link to detailed owner info
+            const tr = $("<tr></tr>").data("owner-id", owner.id).addClass("owner-link");
+            const nameTd = $("<td></td>").text(owner.full_name);
+            const propCountTd = $("<td></td>").text(owner.property_count);
+            // append new elements to document.
+            tr.append(nameTd, propCountTd);
+            $("#owner-tbody").append(tr);
+            // display #table-container
+            $("#table-container").show();
+        }
+    }
+    catch(err){
+        console.log(err);
+    }
+}
 
 // .list-link Handler Functions
 async function listByCategory() {
     // This function will have cases based off of val of target's id
-    const id = $(this).attr("id")
-    // Array of id names for the other div sections
-    const containerArr = ["flash-container", "table-container", "results-container", "owner-container"];
-    // loop that hides unnecessary containers
-    for (let container of containerArr) {
-        $(`#${container}`).hide()
-    }
+    const id = $(this).text();
+    // hide irrelevant sections
+    hideSections(["table-container", "results-container", "owner-container"]);
 
-    // Clear ul and nav-btn-container
+    // clear ul and page-btn-container
     $("#type-list").empty();
-    $("#nav-btn-container").empty();
+    $("#page-btn-container").empty();
     
-    // Switch Statement determines what list rendering function is used based on target's id
+    // switch statement determines what list rendering function is used based on target's id
     let renderFunc = undefined;
     switch(id) {
-        case "owners":
+        case "Owners":
             renderFunc = renderAllOwnersByPage;
             break;
-        case "properties":
+        case "Properties":
             renderFunc = renderAllPropertiesByPage;
             break;
-        case "companies":
+        case "Companies":
             renderFunc = renderAllCompaniesByPage;
             break;
     }
@@ -175,22 +226,19 @@ async function listByCategory() {
     $("#list-container").show();
 }
 
-// Class Click Events
-
-
-// .page-nav-btn Handler Function
-function navTypePage() {
+// .page-btn Handler Function
+function traversePages() {
     try{
-        // Get page id, model from data attributes
+        // page-btn contain page-ids for prev or next pages
         const page = $(this).data("page-id");
-        // Boolean variables determining which category is populating the type list section
+        // bool vars
         const isOwners = $(this).hasClass("owners-list");
         const isProperties = $(this).hasClass("properties-list");
         const isCompanies = $(this).hasClass("  companies-list");
-        // Clear type list ul and nav btn container
+        // clear #type-list ul and #page-btn-container
         $("#type-list").empty();
-        $("#nav-btn-container").empty();
-        // Conditional determining which render function to use
+        $("#page-btn-container").empty();
+        // determine render function based on bool var
         if (isOwners) {
             return renderAllOwnersByPage(page);
         }
@@ -210,8 +258,6 @@ function navTypePage() {
     }
 }
 
-
-
 // .owner-link Handler Function
 async function showOwnerData() {
     try{
@@ -222,11 +268,7 @@ async function showOwnerData() {
         // access owner data
         const ownerObj = response.data.owner;
         // clear other sections
-        const containerArr = ["flash-container", "table-container", "results-container", "list-container"];
-        // loop that hides unnecessary containers
-        for (let container of containerArr) {
-            $(`#${container}`).hide()
-        }
+        hideSections(["table-container", "results-container", "list-container"]);
         // {"owner" : {id, full_name, address, *llc_name, *property_count, *[properties]}}
         $("#owner-name-h1").text(`${ownerObj['full_name']}`);
         $("#owner-address-p").text(`Mailing Address: ${ownerObj['address']}`);
@@ -240,7 +282,11 @@ async function showOwnerData() {
         // Loop creates lis of properties in ownerObj
         const propertyArr = ownerObj["properties"];
         for (let property of propertyArr) {
-            const li = `<li class="list-group-item">${property}</li>`;
+            const li =
+            $("<li></li>")
+            .addClass("list-group-item")
+            .text(property);
+            // const li = `<li class="list-group-item">${property}</li>`;
             $("#property-list").append(li);
         };
 

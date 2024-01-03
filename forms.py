@@ -6,6 +6,5 @@ from flask import request
 # Forms
 class SearchForm(FlaskForm):
     """Form for making queries to database"""
-    name = StringField('Owner Name')
-    property = StringField('Address')
+    search = StringField('search')
     
