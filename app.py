@@ -1,15 +1,15 @@
 from flask import Flask, render_template, flash, redirect, request, jsonify
 from modules import Property, Owner, Company, OwnerCompany, connect_db, db
-from admin import SECRET_KEY, DATABASE_URI
+# from admin import SECRET_KEY, DATABASE_URI
 from sqlalchemy import func
 import os
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', DATABASE_URI)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql:///washoe_properties')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
-app.config['SECRET_KEY'] = SECRET_KEY
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', '1Kn0w@53cr3t')
 
 app.app_context().push()
 connect_db(app)
