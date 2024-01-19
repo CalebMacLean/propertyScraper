@@ -12,15 +12,20 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql:///washoe_properties')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'P@55w0rdI5S3cr3t')
 
 app.app_context().push()
 connect_db(app)
 db.create_all()
 
 # Global Variables
+starting_url = None
 max_id = db.session.query(func.max(CrawlerProgress.id)).scalar()
-crawler_progress = CrawlerProgress.query.filter(CrawlerProgress.id == max_id).first()
-starting_url = crawler_progress.next_url
+if max_id:
+    crawler_progress = CrawlerProgress.query.filter(CrawlerProgress.id == max_id).first()
+    starting_url = crawler_progress.next_url
+else:
+    starting_url = 'https://www.washoecounty.gov/assessor/cama/?parid=00102001'
 
 
 # Database Functions
