@@ -17,7 +17,31 @@ db.create_all()
 
 @app.route('/')
 def home():
+    # GET Behaviors
+    # Form Search Form created in forms.py
+    # Query to database that finds the top 10 owners with the most property.
+    # landlords = (db.session.query(Owner.id, Owner.full_name, func.count(Property.id).label('property_count'))
+    #             .join(Property)
+    #             .group_by(Owner.id)
+    #             .order_by(func.count(Property.id).desc())
+    #             .limit(10))
     
+    # POST Behaviors
+    # if form.validate_on_submit():
+        # Variables containing form values
+        # search_val = form.search.data.upper()
+        # Render Variables 
+        # properties = Property.query.filter(Property.address.contains(search_val)).limit(10).all()
+        # owners = Owner.query.filter(Owner.full_name.contains(search_val)).limit(10).all()
+        # companies = Company.query.filter(Company.llc_name.contains(search_val)).limit(10).all()
+        # Render page
+        # return render_template('search_results.html',
+                                # form=form, 
+                                # owners=owners, 
+                                # properties=properties,
+                                # companies=companies)
+    
+    # Initial GET render
     return render_template('index.html')
     
 # #########################################################
